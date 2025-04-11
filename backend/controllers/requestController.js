@@ -1,7 +1,7 @@
 const Request = require('../models/Request');
 const Gym = require('../models/Gym');
 
-// Create a request (for members to join or trainers to apply)
+// Create a request (for members to join, trainers to apply, or members to request plans)
 const createRequest = async (req, res) => {
   const { gym, type } = req.body;
 
@@ -17,6 +17,17 @@ const createRequest = async (req, res) => {
     }
     if (type === 'apply_trainer' && req.user.role !== 'trainer') {
       return res.status(400).json({ message: 'Only trainers can apply to be a trainer' });
+    }
+    if ((type === 'request_workout' || type === 'request_diet') && req.user.role !== 'member') {
+      return res.status(400).json({ message: 'Only members can request workout or diet plans' });
+    }
+
+    // For workout/diet requests, ensure the member belongs to the gym
+    if (type === 'request_workout' || type === 'request_diet') {
+      const memberIds = gymData.members.map((id) => id.toString());
+      if (!memberIds.includes(req.user._id.toString())) {
+        return res.status(400).json({ message: 'You must be a member of this gym to request plans' });
+      }
     }
 
     // Check if a request already exists
@@ -48,7 +59,8 @@ const getRequests = async (req, res) => {
     }
 
     const isGymOwner = gym.owner.toString() === req.user._id.toString();
-    const isTrainer = gym.trainers.includes(req.user._id);
+    const trainerIds = gym.trainers.map((id) => id.toString());
+    const isTrainer = trainerIds.includes(req.user._id.toString());
     const isMainOwner = req.user.role === 'owner';
 
     if (!isMainOwner && !isGymOwner && !isTrainer) {
@@ -76,7 +88,8 @@ const acceptRequest = async (req, res) => {
 
     const gym = request.gym;
     const isGymOwner = gym.owner.toString() === req.user._id.toString();
-    const isTrainer = gym.trainers.includes(req.user._id);
+    const trainerIds = gym.trainers.map((id) => id.toString());
+    const isTrainer = trainerIds.includes(req.user._id.toString());
     const isMainOwner = req.user.role === 'owner';
 
     if (!isMainOwner && !isGymOwner && !isTrainer) {
@@ -90,13 +103,15 @@ const acceptRequest = async (req, res) => {
     request.status = 'accepted';
     await request.save();
 
-    // Add user to gym based on request type
+    // Add user to gym based on request type (for join_gym and apply_trainer)
     if (request.type === 'join_gym') {
       gym.members.push(request.user);
+      await gym.save();
     } else if (request.type === 'apply_trainer') {
       gym.trainers.push(request.user);
+      await gym.save();
     }
-    await gym.save();
+    // For workout/diet requests, the trainer will create the plan manually
 
     res.json(request);
   } catch (error) {
@@ -116,7 +131,8 @@ const denyRequest = async (req, res) => {
 
     const gym = request.gym;
     const isGymOwner = gym.owner.toString() === req.user._id.toString();
-    const isTrainer = gym.trainers.includes(req.user._id);
+    const trainerIds = gym.trainers.map((id) => id.toString());
+    const isTrainer = trainerIds.includes(req.user._id.toString());
     const isMainOwner = req.user.role === 'owner';
 
     if (!isMainOwner && !isGymOwner && !isTrainer) {

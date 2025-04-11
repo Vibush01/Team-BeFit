@@ -31,6 +31,7 @@ app.use('/api/gyms', require('./routes/gymRoutes'));
 app.use('/api/memberships', require('./routes/membershipRoutes'));
 app.use('/api/requests', require('./routes/requestRoutes'));
 app.use('/api/plans', require('./routes/planRoutes'));
+app.use('/api/chat', require('./routes/chatRoutes'));
 
 // Basic route
 app.get('/', (req, res) => {

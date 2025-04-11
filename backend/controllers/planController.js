@@ -68,4 +68,28 @@ const createDietPlan = async (req, res) => {
   }
 };
 
-module.exports = { createWorkoutPlan, createDietPlan };
+// Get workout plans for a member
+const getMemberWorkoutPlans = async (req, res) => {
+  try {
+    const workoutPlans = await WorkoutPlan.find({ member: req.user._id })
+      .populate('trainer', 'name email')
+      .populate('gym', 'name');
+    res.json(workoutPlans);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get diet plans for a member
+const getMemberDietPlans = async (req, res) => {
+  try {
+    const dietPlans = await DietPlan.find({ member: req.user._id })
+      .populate('trainer', 'name email')
+      .populate('gym', 'name');
+    res.json(dietPlans);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createWorkoutPlan, createDietPlan, getMemberWorkoutPlans, getMemberDietPlans };

@@ -13,7 +13,7 @@ const requestSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['join_gym', 'apply_trainer'],
+    enum: ['join_gym', 'apply_trainer', 'request_workout', 'request_diet'],
     required: [true, 'Request type is required'],
   },
   status: {
