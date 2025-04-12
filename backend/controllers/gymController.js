@@ -212,10 +212,17 @@ const getGymProgress = async (req, res) => {
       return res.status(404).json({ message: 'Gym not found' });
     }
 
-    const isGymOwner = gym.owner.toString() === req.user._id.toString();
+    console.log('getGymProgress - Gym Owner ID:', gym.owner._id.toString()); // Fixed logging
+    console.log('getGymProgress - Request User ID:', req.user._id.toString());
+
+    const isGymOwner = gym.owner._id.toString() === req.user._id.toString(); // Fixed comparison
     const trainerIds = gym.trainers.map((id) => id.toString());
     const isTrainer = trainerIds.includes(req.user._id.toString());
     const isMainOwner = req.user.role === 'owner';
+
+    console.log('getGymProgress - isGymOwner:', isGymOwner);
+    console.log('getGymProgress - isTrainer:', isTrainer);
+    console.log('getGymProgress - isMainOwner:', isMainOwner);
 
     if (!isMainOwner && !isGymOwner && !isTrainer) {
       return res.status(403).json({ message: 'Not authorized to view progress for this gym' });
@@ -243,6 +250,41 @@ const getGymProgress = async (req, res) => {
   }
 };
 
+// Get a single gym by ID
+const getGymById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const gym = await Gym.findById(id)
+      .populate('owner', 'name email')
+      .populate('trainers', 'name email')
+      .populate('members', 'name email');
+    if (!gym) {
+      return res.status(404).json({ message: 'Gym not found' });
+    }
+
+    console.log('getGymById - Gym Owner ID:', gym.owner._id.toString()); // Fixed logging
+    console.log('getGymById - Request User ID:', req.user._id.toString());
+
+    const isGymOwner = gym.owner._id.toString() === req.user._id.toString(); // Fixed comparison
+    const trainerIds = gym.trainers.map((id) => id.toString());
+    const isTrainer = trainerIds.includes(req.user._id.toString());
+    const isMainOwner = req.user.role === 'owner';
+
+    console.log('getGymById - isGymOwner:', isGymOwner);
+    console.log('getGymById - isTrainer:', isTrainer);
+    console.log('getGymById - isMainOwner:', isMainOwner);
+
+    if (!isMainOwner && !isGymOwner && !isTrainer) {
+      return res.status(403).json({ message: 'Not authorized to view this gym' });
+    }
+
+    res.json(gym);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createGym,
   updateGym,
@@ -254,4 +296,5 @@ module.exports = {
   removeMember,
   getAllGyms,
   getGymProgress,
+  getGymById,
 };

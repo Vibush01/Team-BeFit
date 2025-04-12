@@ -23,6 +23,7 @@ const protect = async (req, res, next) => {
         return res.status(401).json({ message: 'Not authorized, user not found' });
       }
 
+      console.log('Protect Middleware - User ID:', req.user._id.toString()); // Debug log
       next();
     } catch (error) {
       res.status(401).json({ message: 'Not authorized, token failed' });

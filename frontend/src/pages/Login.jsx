@@ -28,7 +28,14 @@ function Login() {
       if (response.ok) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.role);
-        navigate('/');
+        // Redirect based on role
+        if (data.role === 'owner') {
+          navigate('/owner-dashboard');
+        } else if (data.role === 'gym_owner') {
+          navigate('/'); // Gym owner will need to create a gym first
+        } else {
+          navigate('/');
+        }
       } else {
         setError(data.message || 'Login failed');
       }
