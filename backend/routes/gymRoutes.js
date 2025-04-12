@@ -12,7 +12,7 @@ const {
   removeMember,
   getAllGyms,
   getGymProgress,
-  getGymById, // New endpoint
+  getGymById,
 } = require('../controllers/gymController');
 
 // Gym management routes (protected and role-restricted)
@@ -31,9 +31,9 @@ router.delete('/:id/members/:memberId', protect, authorize('owner', 'gym_owner')
 router.get('/all', protect, authorize('trainer', 'member'), getAllGyms);
 
 // Route for gym progress tracking
-router.get('/:id/progress', protect, authorize('owner', 'gym_owner', 'trainer'), getGymProgress);
+router.get('/:id/progress', protect, authorize('owner', 'gym_owner', 'trainer', 'member'), getGymProgress);
 
 // Route for fetching a single gym by ID
-router.get('/:id', protect, authorize('owner', 'gym_owner', 'trainer'), getGymById);
+router.get('/:id', protect, authorize('owner', 'gym_owner', 'trainer', 'member'), getGymById);
 
 module.exports = router;

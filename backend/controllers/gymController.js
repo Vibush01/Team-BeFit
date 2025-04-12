@@ -212,19 +212,24 @@ const getGymProgress = async (req, res) => {
       return res.status(404).json({ message: 'Gym not found' });
     }
 
-    console.log('getGymProgress - Gym Owner ID:', gym.owner._id.toString()); // Fixed logging
+    console.log('getGymProgress - Gym Owner ID:', gym.owner._id.toString());
     console.log('getGymProgress - Request User ID:', req.user._id.toString());
 
-    const isGymOwner = gym.owner._id.toString() === req.user._id.toString(); // Fixed comparison
-    const trainerIds = gym.trainers.map((id) => id.toString());
+    const isGymOwner = gym.owner._id.toString() === req.user._id.toString();
+    const trainerIds = gym.trainers.map((trainer) => trainer._id.toString());
     const isTrainer = trainerIds.includes(req.user._id.toString());
+    const memberIds = gym.members.map((member) => member._id.toString());
+    const isMember = memberIds.includes(req.user._id.toString());
     const isMainOwner = req.user.role === 'owner';
 
+    console.log('getGymProgress - Trainer IDs:', trainerIds);
+    console.log('getGymProgress - Member IDs:', memberIds);
     console.log('getGymProgress - isGymOwner:', isGymOwner);
     console.log('getGymProgress - isTrainer:', isTrainer);
+    console.log('getGymProgress - isMember:', isMember);
     console.log('getGymProgress - isMainOwner:', isMainOwner);
 
-    if (!isMainOwner && !isGymOwner && !isTrainer) {
+    if (!isMainOwner && !isGymOwner && !isTrainer && !isMember) {
       return res.status(403).json({ message: 'Not authorized to view progress for this gym' });
     }
 
@@ -263,19 +268,24 @@ const getGymById = async (req, res) => {
       return res.status(404).json({ message: 'Gym not found' });
     }
 
-    console.log('getGymById - Gym Owner ID:', gym.owner._id.toString()); // Fixed logging
+    console.log('getGymById - Gym Owner ID:', gym.owner._id.toString());
     console.log('getGymById - Request User ID:', req.user._id.toString());
 
-    const isGymOwner = gym.owner._id.toString() === req.user._id.toString(); // Fixed comparison
-    const trainerIds = gym.trainers.map((id) => id.toString());
+    const isGymOwner = gym.owner._id.toString() === req.user._id.toString();
+    const trainerIds = gym.trainers.map((trainer) => trainer._id.toString());
     const isTrainer = trainerIds.includes(req.user._id.toString());
+    const memberIds = gym.members.map((member) => member._id.toString());
+    const isMember = memberIds.includes(req.user._id.toString());
     const isMainOwner = req.user.role === 'owner';
 
+    console.log('getGymById - Trainer IDs:', trainerIds);
+    console.log('getGymById - Member IDs:', memberIds);
     console.log('getGymById - isGymOwner:', isGymOwner);
     console.log('getGymById - isTrainer:', isTrainer);
+    console.log('getGymById - isMember:', isMember);
     console.log('getGymById - isMainOwner:', isMainOwner);
 
-    if (!isMainOwner && !isGymOwner && !isTrainer) {
+    if (!isMainOwner && !isGymOwner && !isTrainer && !isMember) {
       return res.status(403).json({ message: 'Not authorized to view this gym' });
     }
 

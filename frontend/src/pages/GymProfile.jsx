@@ -1,22 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import Chat from '../components/Chat';
 
 function GymProfile() {
   const { id } = useParams(); // Get gym ID from URL
   const navigate = useNavigate();
   const [gym, setGym] = useState(null);
   const [progress, setProgress] = useState(null);
+  const [requests, setRequests] = useState([]);
   const [formData, setFormData] = useState({ name: '', address: '', photos: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [editMode, setEditMode] = useState(false);
 
-  // Fetch gym details and progress
+  // Fetch gym details, progress, and membership requests
   useEffect(() => {
     const fetchGymDetails = async () => {
       try {
         const token = localStorage.getItem('token');
-        console.log('GymProfile - Token:', token); // Debug log
+        console.log('GymProfile - Token:', token);
 
         if (!token) {
           throw new Error('No token found. Please log in again.');
@@ -44,8 +46,20 @@ function GymProfile() {
           throw new Error(progressData.message || 'Failed to fetch gym progress');
         }
 
+        // Fetch membership requests
+        const requestsResponse = await fetch(`http://localhost:5000/api/requests/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const requestsData = await requestsResponse.json();
+        if (!requestsResponse.ok) {
+          throw new Error(requestsData.message || 'Failed to fetch membership requests');
+        }
+
         setGym(gymData);
         setProgress(progressData);
+        setRequests(requestsData.filter((req) => req.type === 'join_gym')); // Only show join_gym requests
         setFormData({
           name: gymData.name,
           address: gymData.address || '',
@@ -144,8 +158,61 @@ function GymProfile() {
           totalMembers: progress.totalMembers - 1,
           memberships: progress.memberships.filter((membership) => membership.member._id !== memberId),
         });
+        setRequests(requests.filter((req) => req.user._id !== memberId));
       } else {
         setError(data.message || 'Failed to remove member');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    }
+  };
+
+  // Accept a membership request
+  const handleAcceptRequest = async (requestId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/requests/${requestId}/accept`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setRequests(requests.filter((req) => req._id !== requestId));
+        setGym({
+          ...gym,
+          members: [...gym.members, data.user],
+        });
+        setProgress({
+          ...progress,
+          totalMembers: progress.totalMembers + 1,
+        });
+      } else {
+        setError(data.message || 'Failed to accept request');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    }
+  };
+
+  // Deny a membership request
+  const handleDenyRequest = async (requestId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/requests/${requestId}/deny`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setRequests(requests.filter((req) => req._id !== requestId));
+      } else {
+        setError(data.message || 'Failed to deny request');
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');
@@ -226,6 +293,40 @@ function GymProfile() {
           </div>
         )}
 
+        <h3 className="text-xl font-semibold mb-4">Membership Requests</h3>
+        {requests.length > 0 ? (
+          <div className="space-y-4 mb-6">
+            {requests.map((request) => (
+              <div key={request._id} className="border p-4 rounded-lg flex justify-between items-center">
+                <div>
+                  <p className="text-gray-700">
+                    User: {request.user.name} ({request.user.email})
+                  </p>
+                  <p className="text-gray-700">
+                    Requested on: {new Date(request.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => handleAcceptRequest(request._id)}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-200"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleDenyRequest(request._id)}
+                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-200"
+                  >
+                    Deny
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 mb-6">No membership requests.</p>
+        )}
+
         <h3 className="text-xl font-semibold mb-4">Trainers</h3>
         {gym.trainers && gym.trainers.length > 0 ? (
           <ul className="list-disc list-inside mb-6">
@@ -270,7 +371,7 @@ function GymProfile() {
 
         <h3 className="text-xl font-semibold mb-4">Memberships</h3>
         {progress.memberships && progress.memberships.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-4 mb-6">
             {progress.memberships.map((membership) => (
               <div key={membership.member._id} className="border p-4 rounded-lg">
                 <p className="text-gray-700">
@@ -289,8 +390,14 @@ function GymProfile() {
             ))}
           </div>
         ) : (
-          <p className="text-gray-500">No memberships yet.</p>
+          <p className="text-gray-500 mb-6">No memberships yet.</p>
         )}
+
+        <Chat
+          gymId={id}
+          userId={localStorage.getItem('userId')}
+          role={localStorage.getItem('role')}
+        />
       </div>
     </div>
   );

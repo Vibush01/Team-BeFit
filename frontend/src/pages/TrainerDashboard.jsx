@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Chat from '../components/Chat';
 
 function TrainerDashboard() {
   const [gyms, setGyms] = useState([]);
@@ -12,6 +13,7 @@ function TrainerDashboard() {
     endDate: '',
     type: 'workout', // Default to workout plan
   });
+  const [selectedGymId, setSelectedGymId] = useState('');
 
   // Fetch gyms where the trainer is assigned
   useEffect(() => {
@@ -19,7 +21,7 @@ function TrainerDashboard() {
       try {
         const token = localStorage.getItem('token');
         const userId = localStorage.getItem('userId');
-        console.log('TrainerDashboard - User ID:', userId); // Debug log
+        console.log('TrainerDashboard - User ID:', userId);
 
         if (!token || !userId) {
           throw new Error('Not authenticated. Please log in again.');
@@ -33,11 +35,13 @@ function TrainerDashboard() {
 
         const data = await response.json();
         if (response.ok) {
-          // Filter gyms where the trainer is assigned
           const trainerGyms = data.filter((gym) =>
             gym.trainers.some((trainer) => trainer._id === userId)
           );
           setGyms(trainerGyms);
+          if (trainerGyms.length > 0) {
+            setSelectedGymId(trainerGyms[0]._id); // Default to the first gym
+          }
         } else {
           setError(data.message || 'Failed to fetch gyms');
         }
@@ -193,6 +197,35 @@ function TrainerDashboard() {
             Assign Plan
           </button>
         </form>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
+        <h2 className="text-2xl font-semibold mb-4">Chat with Members or Gym Owner</h2>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2" htmlFor="chatGym">
+            Select Gym to Chat:
+          </label>
+          <select
+            id="chatGym"
+            value={selectedGymId}
+            onChange={(e) => setSelectedGymId(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="">Select Gym</option>
+            {gyms.map((gym) => (
+              <option key={gym._id} value={gym._id}>
+                {gym.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        {selectedGymId && (
+          <Chat
+            gymId={selectedGymId}
+            userId={localStorage.getItem('userId')}
+            role={localStorage.getItem('role')}
+          />
+        )}
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow-lg">

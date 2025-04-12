@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Chat from '../components/Chat';
 
 function MemberDashboard() {
   const [gyms, setGyms] = useState([]);
@@ -8,6 +9,11 @@ function MemberDashboard() {
   const [bodyConditions, setBodyConditions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedGymId, setSelectedGymId] = useState('');
+  const [requestForm, setRequestForm] = useState({
+    gym: '',
+    type: 'request_workout', // Default to workout request
+  });
 
   // Fetch member data
   useEffect(() => {
@@ -15,7 +21,7 @@ function MemberDashboard() {
       try {
         const token = localStorage.getItem('token');
         const userId = localStorage.getItem('userId');
-        console.log('MemberDashboard - User ID:', userId); // Debug log
+        console.log('MemberDashboard - User ID:', userId);
 
         if (!token || !userId) {
           throw new Error('Not authenticated. Please log in again.');
@@ -33,6 +39,10 @@ function MemberDashboard() {
             gym.members.some((member) => member._id === userId)
           );
           setGyms(memberGyms);
+          if (memberGyms.length > 0) {
+            setSelectedGymId(memberGyms[0]._id);
+            setRequestForm({ ...requestForm, gym: memberGyms[0]._id });
+          }
         }
 
         // Fetch workout plans
@@ -88,6 +98,35 @@ function MemberDashboard() {
     fetchData();
   }, []);
 
+  const handleRequestChange = (e) => {
+    setRequestForm({ ...requestForm, [e.target.name]: e.target.value });
+  };
+
+  const handleRequestSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/requests', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestForm),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert('Plan request sent successfully!');
+        setRequestForm({ ...requestForm, type: 'request_workout' });
+      } else {
+        setError(data.message || 'Failed to send request');
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.');
+    }
+  };
+
   if (loading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
@@ -121,6 +160,81 @@ function MemberDashboard() {
           </div>
         ) : (
           <p className="text-gray-500">You are not a member of any gyms yet.</p>
+        )}
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
+        <h2 className="text-2xl font-semibold mb-4">Request Workout/Diet Plan</h2>
+        <form onSubmit={handleRequestSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2" htmlFor="gym">
+              Gym
+            </label>
+            <select
+              name="gym"
+              value={requestForm.gym}
+              onChange={handleRequestChange}
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
+            >
+              <option value="">Select Gym</option>
+              {gyms.map((gym) => (
+                <option key={gym._id} value={gym._id}>
+                  {gym.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 mb-2" htmlFor="type">
+              Request Type
+            </label>
+            <select
+              name="type"
+              value={requestForm.type}
+              onChange={handleRequestChange}
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+              required
+            >
+              <option value="request_workout">Request Workout Plan</option>
+              <option value="request_diet">Request Diet Plan</option>
+            </select>
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition duration-200"
+          >
+            Send Request
+          </button>
+        </form>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
+        <h2 className="text-2xl font-semibold mb-4">Chat with Trainers</h2>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2" htmlFor="chatGym">
+            Select Gym to Chat:
+          </label>
+          <select
+            id="chatGym"
+            value={selectedGymId}
+            onChange={(e) => setSelectedGymId(e.target.value)}
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="">Select Gym</option>
+            {gyms.map((gym) => (
+              <option key={gym._id} value={gym._id}>
+                {gym.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        {selectedGymId && (
+          <Chat
+            gymId={selectedGymId}
+            userId={localStorage.getItem('userId')}
+            role={localStorage.getItem('role')}
+          />
         )}
       </div>
 
