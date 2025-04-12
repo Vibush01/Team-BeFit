@@ -1,4 +1,5 @@
 const Gym = require('../models/Gym');
+const Membership = require('../models/Membership');
 
 // Create a gym
 const createGym = async (req, res) => {
@@ -198,6 +199,50 @@ const getAllGyms = async (req, res) => {
   }
 };
 
+// Get gym progress (number of members, membership details)
+const getGymProgress = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const gym = await Gym.findById(id)
+      .populate('owner', 'name email')
+      .populate('trainers', 'name email')
+      .populate('members', 'name email');
+    if (!gym) {
+      return res.status(404).json({ message: 'Gym not found' });
+    }
+
+    const isGymOwner = gym.owner.toString() === req.user._id.toString();
+    const trainerIds = gym.trainers.map((id) => id.toString());
+    const isTrainer = trainerIds.includes(req.user._id.toString());
+    const isMainOwner = req.user.role === 'owner';
+
+    if (!isMainOwner && !isGymOwner && !isTrainer) {
+      return res.status(403).json({ message: 'Not authorized to view progress for this gym' });
+    }
+
+    const memberships = await Membership.find({ gym: id })
+      .populate('member', 'name email')
+      .sort('startDate');
+
+    const progress = {
+      gymName: gym.name,
+      totalMembers: gym.members.length,
+      totalTrainers: gym.trainers.length,
+      memberships: memberships.map((membership) => ({
+        member: membership.member,
+        startDate: membership.startDate,
+        expiryDate: membership.expiryDate,
+        isActive: new Date() <= membership.expiryDate,
+      })),
+    };
+
+    res.json(progress);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   createGym,
   updateGym,
@@ -208,4 +253,5 @@ module.exports = {
   addMember,
   removeMember,
   getAllGyms,
+  getGymProgress,
 };

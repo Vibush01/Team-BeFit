@@ -1,5 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
+import Signup from './pages/Signup';
+import Login from './pages/Login';
+import Home from './pages/Home';
 
 function App() {
   return (
@@ -7,25 +9,11 @@ function App() {
       <div className="min-h-screen bg-gray-100">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </div>
     </Router>
-  );
-}
-
-function Home() {
-  useEffect(() => {
-    // Test API connection
-    fetch(import.meta.env.VITE_API_URL)
-      .then((res) => res.text())
-      .then((data) => console.log(data))
-      .catch((err) => console.error('API connection error:', err));
-  }, []);
-
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <h1 className="text-4xl font-bold text-blue-600">Welcome to BeFit</h1>
-    </div>
   );
 }
 

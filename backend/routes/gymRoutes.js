@@ -10,7 +10,8 @@ const {
   removeTrainer,
   addMember,
   removeMember,
-  getAllGyms, // New route for listing all gyms
+  getAllGyms,
+  getGymProgress,
 } = require('../controllers/gymController');
 
 // Gym management routes (protected and role-restricted)
@@ -27,5 +28,8 @@ router.delete('/:id/members/:memberId', protect, authorize('owner', 'gym_owner')
 
 // Route for listing all gyms (for trainers and members)
 router.get('/all', protect, authorize('trainer', 'member'), getAllGyms);
+
+// Route for gym progress tracking
+router.get('/:id/progress', protect, authorize('owner', 'gym_owner', 'trainer'), getGymProgress);
 
 module.exports = router;

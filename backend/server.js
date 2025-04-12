@@ -32,6 +32,7 @@ app.use('/api/memberships', require('./routes/membershipRoutes'));
 app.use('/api/requests', require('./routes/requestRoutes'));
 app.use('/api/plans', require('./routes/planRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/tracking', require('./routes/trackingRoutes'));
 
 // Basic route
 app.get('/', (req, res) => {
