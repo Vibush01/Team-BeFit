@@ -2,24 +2,23 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { generateToken } = require('../utils/jwt');
+const authMiddleware = require('../middleware/auth');
+const roleMiddleware = require('../middleware/role');
 
-// Signup route
+// Signup route (public)
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password, role, contactNumber } = req.body;
 
-    // Validate required fields
     if (!name || !email || !password || !role) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create new user
     const user = new User({
       name,
       email,
@@ -29,7 +28,6 @@ router.post('/signup', async (req, res) => {
     });
     await user.save();
 
-    // Generate JWT token
     const token = generateToken(user);
 
     res.status(201).json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
@@ -38,29 +36,25 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// Login route
+// Login route (public)
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validate required fields
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    // Find user
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Compare password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    // Generate JWT token
     const token = generateToken(user);
 
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
@@ -69,10 +63,10 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Get user profile (requires authentication, we'll add middleware later)
-router.get('/profile/:id', async (req, res) => {
+// Get user profile (authenticated user only)
+router.get('/profile', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('-password');
+    const user = await User.findById(req.user.id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -82,20 +76,29 @@ router.get('/profile/:id', async (req, res) => {
   }
 });
 
-// Update user profile (requires authentication, we'll add middleware later)
-router.put('/profile/:id', async (req, res) => {
+// Update user profile (authenticated user only)
+router.put('/profile', authMiddleware, async (req, res) => {
   try {
     const updates = req.body;
-    // Prevent password from being updated via this route
-    delete updates.password;
+    delete updates.password; // Prevent password updates via this route
 
-    const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password');
+    const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true }).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Error updating user profile', error: error.message });
+  }
+});
+
+// Get all users (admin only - for testing, we'll restrict to "owner" role)
+router.get('/', authMiddleware, roleMiddleware(['owner']), async (req, res) => {
+  try {
+    const users = await User.find().select('-password');
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching users', error: error.message });
   }
 });
 

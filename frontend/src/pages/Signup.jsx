@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx'; // Update the extension
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ const Signup = () => {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,7 +23,7 @@ const Signup = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:5000/api/users/signup', formData);
-      localStorage.setItem('token', response.data.token); // Store token
+      login(response.data.token, response.data.user);
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Error signing up');

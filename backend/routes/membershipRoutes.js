@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Membership = require('../models/Membership');
+const authMiddleware = require('../middleware/auth');
+const roleMiddleware = require('../middleware/role');
 
-// Create a new membership (for testing)
-router.post('/', async (req, res) => {
+// Create a new membership (gym_owner or trainer only)
+router.post('/', authMiddleware, roleMiddleware(['gym_owner', 'trainer']), async (req, res) => {
   try {
     const membership = new Membership(req.body);
     await membership.save();
@@ -13,8 +15,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Get all memberships (for testing)
-router.get('/', async (req, res) => {
+// Get all memberships (authenticated users)
+router.get('/', authMiddleware, async (req, res) => {
   try {
     const memberships = await Membership.find().populate('member gym');
     res.json(memberships);
