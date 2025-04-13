@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext.jsx'; // Update the extension
+import { useAuth } from '../context/AuthContext.jsx';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
@@ -19,28 +19,31 @@ const Profile = () => {
   useEffect(() => {
     if (!user) {
       navigate('/login');
-      return;
     }
+  }, [user, navigate]);
 
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/users/profile', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setProfile(response.data);
-        setFormData({
-          name: response.data.name,
-          email: response.data.email,
-          contactNumber: response.data.contactNumber || '',
-          profileImage: response.data.profileImage || '',
-        });
-      } catch (err) {
-        setError(err.response?.data?.message || 'Error fetching profile');
-      }
-    };
+  useEffect(() => {
+    if (user) {
+      const fetchProfile = async () => {
+        try {
+          const response = await axios.get('http://localhost:5000/api/users/profile', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setProfile(response.data);
+          setFormData({
+            name: response.data.name,
+            email: response.data.email,
+            contactNumber: response.data.contactNumber || '',
+            profileImage: response.data.profileImage || '',
+          });
+        } catch (err) {
+          setError(err.response?.data?.message || 'Error fetching profile');
+        }
+      };
 
-    fetchProfile();
-  }, [user, token, navigate]);
+      fetchProfile();
+    }
+  }, [user, token]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

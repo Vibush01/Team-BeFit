@@ -19,6 +19,7 @@ const Chat = require('./models/Chat');
 const userRoutes = require('./routes/userRoutes');
 const gymRoutes = require('./routes/gymRoutes');
 const membershipRoutes = require('./routes/membershipRoutes');
+const planRoutes = require('./routes/planRoutes');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -44,6 +45,7 @@ console.log('Models Defined:', {
 app.use('/api/users', userRoutes);
 app.use('/api/gyms', gymRoutes);
 app.use('/api/memberships', membershipRoutes);
+app.use('/api/plans', planRoutes);
 
 app.get('/', (req, res) => {
   res.send('BeFit Backend is Running');
