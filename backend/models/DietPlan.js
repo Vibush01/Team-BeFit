@@ -4,36 +4,32 @@ const dietPlanSchema = new mongoose.Schema({
   trainer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Trainer is required'],
+    required: true,
   },
   member: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Member is required'],
+    required: true,
   },
   gym: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Gym',
-    required: [true, 'Gym is required'],
+    required: true,
   },
-  plan: {
-    type: String,
-    required: [true, 'Diet plan is required'],
-  },
+  week: [{
+    day: String,
+    meals: [{
+      name: String,
+      calories: Number,
+      protein: Number,
+      carbs: Number,
+      fats: Number,
+    }],
+  }],
   startDate: {
     type: Date,
-    required: [true, 'Start date is required'],
+    required: true,
   },
-  endDate: {
-    type: Date,
-    required: [true, 'End date is required'],
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
-const DietPlan = mongoose.model('DietPlan', dietPlanSchema);
-
-module.exports = DietPlan;
+module.exports = mongoose.model('DietPlan', dietPlanSchema);

@@ -3,40 +3,34 @@ const mongoose = require('mongoose');
 const gymSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Gym name is required'],
+    required: true,
+    trim: true,
   },
   address: {
     type: String,
-    required: [true, 'Address is required'],
+    required: true,
   },
-  photos: [
-    {
-      type: String, // Cloudinary URLs for gym photos
-    },
-  ],
+  photos: [{
+    type: String, // Cloudinary URLs
+  }],
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Gym owner is required'],
+    required: true,
   },
-  trainers: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-  ],
-  members: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-  ],
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  trainers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  members: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  membershipPlans: [{
+    name: String,
+    duration: Number, // in days
+    price: Number,
+  }],
+}, { timestamps: true });
 
-const Gym = mongoose.model('Gym', gymSchema);
-
-module.exports = Gym;
+module.exports = mongoose.model('Gym', gymSchema);

@@ -4,36 +4,30 @@ const workoutPlanSchema = new mongoose.Schema({
   trainer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Trainer is required'],
+    required: true,
   },
   member: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Member is required'],
+    required: true,
   },
   gym: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Gym',
-    required: [true, 'Gym is required'],
+    required: true,
   },
-  plan: {
-    type: String,
-    required: [true, 'Workout plan is required'],
-  },
+  week: [{
+    day: String,
+    exercises: [{
+      name: String,
+      sets: Number,
+      reps: Number,
+    }],
+  }],
   startDate: {
     type: Date,
-    required: [true, 'Start date is required'],
+    required: true,
   },
-  endDate: {
-    type: Date,
-    required: [true, 'End date is required'],
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
-const WorkoutPlan = mongoose.model('WorkoutPlan', workoutPlanSchema);
-
-module.exports = WorkoutPlan;
+module.exports = mongoose.model('WorkoutPlan', workoutPlanSchema);

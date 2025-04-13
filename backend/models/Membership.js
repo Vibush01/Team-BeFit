@@ -4,27 +4,26 @@ const membershipSchema = new mongoose.Schema({
   member: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'Member is required'],
+    required: true,
   },
   gym: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Gym',
-    required: [true, 'Gym is required'],
+    ref: 'User',
+    required: true,
   },
   startDate: {
     type: Date,
-    required: [true, 'Start date is required'],
+    required: true,
   },
-  expiryDate: {
+  endDate: {
     type: Date,
-    required: [true, 'Expiry date is required'],
+    required: true,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
+  plan: {
+    name: String,
+    duration: Number,
+    price: Number,
   },
-});
+}, { timestamps: true });
 
-const Membership = mongoose.model('Membership', membershipSchema);
-
-module.exports = Membership;
+module.exports = mongoose.model('Membership', membershipSchema);
