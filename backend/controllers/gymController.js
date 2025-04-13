@@ -200,3 +200,61 @@ exports.getMemberships = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+// Get gym members (Trainer, GymOwner, Owner)
+exports.getGymMembers = async (req, res) => {
+  const { gymId } = req.params;
+
+  try {
+    const gym = await Gym.findById(gymId);
+    if (!gym) {
+      return res.status(404).json({ message: 'Gym not found' });
+    }
+
+    const isOwner = req.user.role === 'Owner';
+    const isGymOwner = req.user.role === 'GymOwner' && gym.owner.toString() === req.user.id;
+    const isTrainer = req.user.role === 'Trainer' && gym.trainers.includes(req.user.id);
+    if (!isOwner && !isGymOwner && !isTrainer) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const members = await User.find({ _id: { $in: gym.members } }).select('name email contactNumber');
+    res.status(200).json(members);
+  } catch (error) {
+    console.error('Error fetching gym members:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Get member membership details (Trainer, GymOwner, Owner)
+exports.getMemberMembership = async (req, res) => {
+  const { gymId, memberId } = req.params;
+
+  try {
+    const gym = await Gym.findById(gymId);
+    if (!gym) {
+      return res.status(404).json({ message: 'Gym not found' });
+    }
+
+    const isOwner = req.user.role === 'Owner';
+    const isGymOwner = req.user.role === 'GymOwner' && gym.owner.toString() === req.user.id;
+    const isTrainer = req.user.role === 'Trainer' && gym.trainers.includes(req.user.id);
+    if (!isOwner && !isGymOwner && !isTrainer) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    if (!gym.members.includes(memberId)) {
+      return res.status(400).json({ message: 'User is not a member of this gym' });
+    }
+
+    const membership = await Membership.findOne({ gym: gymId, member: memberId }).populate('member', 'name email');
+    if (!membership) {
+      return res.status(404).json({ message: 'Membership not found' });
+    }
+
+    res.status(200).json(membership);
+  } catch (error) {
+    console.error('Error fetching membership details:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};

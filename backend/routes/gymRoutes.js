@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getGyms, createGym, updateGym, deleteGym, assignTrainer, removeTrainer, getMemberships } = require('../controllers/gymController');
+const { getGyms, createGym, updateGym, deleteGym, assignTrainer, removeTrainer, getMemberships, getGymMembers, getMemberMembership } = require('../controllers/gymController');
 const auth = require('../middleware/auth');
 const role = require('../middleware/role');
 
@@ -24,5 +24,11 @@ router.delete('/:gymId/trainers/:trainerId', auth, role('GymOwner'), removeTrain
 
 // GET memberships (GymOwner or Trainer)
 router.get('/:gymId/memberships', auth, getMemberships);
+
+// GET gym members (Trainer, GymOwner, Owner)
+router.get('/:gymId/members', auth, getGymMembers);
+
+// GET member membership details (Trainer, GymOwner, Owner)
+router.get('/:gymId/memberships/:memberId', auth, getMemberMembership);
 
 module.exports = router;
