@@ -5,7 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 const configureCloudinary = require('./config/cloudinary');
-const errorHandler = require('./middleware/error'); // Add this import
+const errorHandler = require('./middleware/error');
 const authRoutes = require('./routes/auth');
 const gymRoutes = require('./routes/gym');
 const memberRoutes = require('./routes/member');
@@ -13,6 +13,7 @@ const chatRoutes = require('./routes/chat');
 const announcementRoutes = require('./routes/announcement');
 const adminRoutes = require('./routes/admin');
 const scheduleRoutes = require('./routes/schedule');
+const contactRoutes = require('./routes/contact'); // Add this import
 
 dotenv.config();
 const app = express();
@@ -40,8 +41,9 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use('/api/contact', contactRoutes); // Add this route
 
-// Error Handler Middleware (must be after routes)
+// Error Handler Middleware
 app.use(errorHandler);
 
 // Test Route

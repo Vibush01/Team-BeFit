@@ -28,7 +28,7 @@ const Navbar = () => {
                                 </>
                             )}
                             {user.role === 'member' && !userDetails?.gym && (
-                                <Link to="/" className="text-white mr-4">Find a Gym</Link>
+                                <Link to="/gyms" className="text-white mr-4">Find a Gym</Link> // Removed extra parenthesis
                             )}
                             {(user.role === 'member' || user.role === 'trainer') && userDetails?.gym && (
                                 <>

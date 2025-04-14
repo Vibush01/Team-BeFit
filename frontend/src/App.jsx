@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify'; // Add this import
-import 'react-toastify/dist/ReactToastify.css'; // Add this import
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -23,6 +23,7 @@ import TrainerSchedule from './pages/TrainerSchedule';
 import Booking from './pages/Booking';
 import TrainerBookings from './pages/TrainerBookings';
 import MemberDashboard from './pages/MemberDashboard';
+import HomePage from './pages/HomePage'; // Add this import
 
 function App() {
     return (
@@ -30,7 +31,8 @@ function App() {
             <Router>
                 <Navbar />
                 <Routes>
-                    <Route path="/" element={<GymList />} />
+                    <Route path="/" element={<HomePage />} /> {/* Set HomePage as default route */}
+                    <Route path="/gyms" element={<GymList />} /> {/* Move GymList to /gyms */}
                     <Route path="/signup" element={<RoleSelection />} />
                     <Route path="/signup/admin" element={<AdminSignup />} />
                     <Route path="/signup/gym" element={<GymSignup />} />
