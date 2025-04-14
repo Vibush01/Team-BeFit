@@ -16,6 +16,7 @@ import MacroCalculator from './pages/MacroCalculator';
 import ProgressTracker from './pages/ProgressTracker';
 import Chat from './pages/Chat';
 import Announcements from './pages/Announcements';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
     return (
@@ -54,6 +55,11 @@ function App() {
                     <Route path="/announcements" element={
                         <ProtectedRoute>
                             <Announcements />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/admin-dashboard" element={
+                        <ProtectedRoute>
+                            <AdminDashboard />
                         </ProtectedRoute>
                     } />
                     <Route

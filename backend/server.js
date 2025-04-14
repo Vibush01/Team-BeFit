@@ -10,6 +10,7 @@ const gymRoutes = require('./routes/gym');
 const memberRoutes = require('./routes/member');
 const chatRoutes = require('./routes/chat');
 const announcementRoutes = require('./routes/announcement');
+const adminRoutes = require('./routes/admin');
 
 dotenv.config();
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/gym', gymRoutes);
 app.use('/api/member', memberRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/announcement', announcementRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Test Route
 app.get('/api/test', (req, res) => {
@@ -61,7 +63,6 @@ io.on('connection', (socket) => {
             });
             await chatMessage.save();
 
-            // Populate the sender field before broadcasting
             const populatedMessage = await ChatMessage.findById(chatMessage._id)
                 .populate('sender', 'name')
                 .exec();
