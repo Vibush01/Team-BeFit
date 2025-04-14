@@ -5,6 +5,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const connectDB = require('./config/db');
 const configureCloudinary = require('./config/cloudinary');
+const errorHandler = require('./middleware/error'); // Add this import
 const authRoutes = require('./routes/auth');
 const gymRoutes = require('./routes/gym');
 const memberRoutes = require('./routes/member');
@@ -39,6 +40,9 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/schedule', scheduleRoutes);
+
+// Error Handler Middleware (must be after routes)
+app.use(errorHandler);
 
 // Test Route
 app.get('/api/test', (req, res) => {

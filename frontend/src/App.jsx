@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify'; // Add this import
+import 'react-toastify/dist/ReactToastify.css'; // Add this import
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -20,6 +22,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import TrainerSchedule from './pages/TrainerSchedule';
 import Booking from './pages/Booking';
 import TrainerBookings from './pages/TrainerBookings';
+import MemberDashboard from './pages/MemberDashboard';
 
 function App() {
     return (
@@ -80,6 +83,11 @@ function App() {
                             <TrainerBookings />
                         </ProtectedRoute>
                     } />
+                    <Route path="/member-dashboard" element={
+                        <ProtectedRoute>
+                            <MemberDashboard />
+                        </ProtectedRoute>
+                    } />
                     <Route
                         path="/profile"
                         element={
@@ -89,6 +97,7 @@ function App() {
                         }
                     />
                 </Routes>
+                <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
             </Router>
         </AuthProvider>
     );

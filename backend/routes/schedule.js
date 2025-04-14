@@ -7,7 +7,7 @@ const Trainer = require('../models/Trainer');
 const Member = require('../models/Member');
 
 // Create a schedule (Trainer only)
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, async (req, res, next) => {
     if (req.user.role !== 'trainer') {
         return res.status(403).json({ message: 'Access denied' });
     }
@@ -24,7 +24,6 @@ router.post('/', authMiddleware, async (req, res) => {
             return res.status(400).json({ message: 'Trainer must be part of a gym' });
         }
 
-        // Check if the trainer already has a schedule for this date and time
         const existingSchedule = await Schedule.findOne({
             trainer: req.user.id,
             date: new Date(date),
@@ -44,12 +43,12 @@ router.post('/', authMiddleware, async (req, res) => {
         await schedule.save();
         res.status(201).json(schedule);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
 // Update a schedule (Trainer only)
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res, next) => {
     if (req.user.role !== 'trainer') {
         return res.status(403).json({ message: 'Access denied' });
     }
@@ -70,7 +69,6 @@ router.put('/:id', authMiddleware, async (req, res) => {
             return res.status(400).json({ message: 'Cannot update a booked schedule' });
         }
 
-        // Check for conflicts with other schedules
         if (date || timeSlot) {
             const existingSchedule = await Schedule.findOne({
                 trainer: req.user.id,
@@ -89,12 +87,12 @@ router.put('/:id', authMiddleware, async (req, res) => {
         await schedule.save();
         res.json(schedule);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
 // Delete a schedule (Trainer only)
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', authMiddleware, async (req, res, next) => {
     if (req.user.role !== 'trainer') {
         return res.status(403).json({ message: 'Access denied' });
     }
@@ -116,12 +114,12 @@ router.delete('/:id', authMiddleware, async (req, res) => {
         await schedule.deleteOne();
         res.json({ message: 'Schedule deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
 // Get trainer's schedules (Trainer only)
-router.get('/my-schedules', authMiddleware, async (req, res) => {
+router.get('/my-schedules', authMiddleware, async (req, res, next) => {
     if (req.user.role !== 'trainer') {
         return res.status(403).json({ message: 'Access denied' });
     }
@@ -132,12 +130,12 @@ router.get('/my-schedules', authMiddleware, async (req, res) => {
             .sort({ date: 1, timeSlot: 1 });
         res.json(schedules);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
 // Get available schedules for booking (Member only)
-router.get('/available', authMiddleware, async (req, res) => {
+router.get('/available', authMiddleware, async (req, res, next) => {
     if (req.user.role !== 'member') {
         return res.status(403).json({ message: 'Access denied' });
     }
@@ -151,7 +149,7 @@ router.get('/available', authMiddleware, async (req, res) => {
         const schedules = await Schedule.find({
             gym: member.gym,
             isBooked: false,
-            date: { $gte: new Date() }, // Only future dates
+            date: { $gte: new Date() },
         })
             .populate('trainer', 'name')
             .populate('gym', 'gymName')
@@ -159,12 +157,12 @@ router.get('/available', authMiddleware, async (req, res) => {
 
         res.json(schedules);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
 // Book a schedule (Member only)
-router.post('/book/:scheduleId', authMiddleware, async (req, res) => {
+router.post('/book/:scheduleId', authMiddleware, async (req, res, next) => {
     if (req.user.role !== 'member') {
         return res.status(403).json({ message: 'Access denied' });
     }
@@ -203,12 +201,12 @@ router.post('/book/:scheduleId', authMiddleware, async (req, res) => {
 
         res.status(201).json(booking);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
 // Get trainer's bookings (Trainer only)
-router.get('/my-bookings', authMiddleware, async (req, res) => {
+router.get('/my-bookings', authMiddleware, async (req, res, next) => {
     if (req.user.role !== 'trainer') {
         return res.status(403).json({ message: 'Access denied' });
     }
@@ -220,7 +218,24 @@ router.get('/my-bookings', authMiddleware, async (req, res) => {
             .sort({ date: 1, timeSlot: 1 });
         res.json(bookings);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
+    }
+});
+
+// Get member's bookings (Member only)
+router.get('/my-bookings', authMiddleware, async (req, res, next) => {
+    if (req.user.role !== 'member') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    try {
+        const bookings = await Booking.find({ member: req.user.id })
+            .populate('trainer', 'name email')
+            .populate('gym', 'gymName')
+            .sort({ date: 1, timeSlot: 1 });
+        res.json(bookings);
+    } catch (error) {
+        next(error);
     }
 });
 

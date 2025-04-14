@@ -2,6 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import GymFormModal from '../components/GymFormModal';
+import { toast } from 'react-toastify';
 
 const AdminDashboard = () => {
     const { user } = useContext(AuthContext);
@@ -12,10 +13,12 @@ const AdminDashboard = () => {
     const [editGym, setEditGym] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchGyms = async () => {
             try {
+                setLoading(true);
                 const token = localStorage.getItem('token');
                 const res = await axios.get('http://localhost:5000/api/admin/gyms', {
                     headers: { Authorization: `Bearer ${token}` },
@@ -23,6 +26,9 @@ const AdminDashboard = () => {
                 setGyms(res.data);
             } catch (err) {
                 setError('Failed to fetch gyms');
+                toast.error('Failed to fetch gyms');
+            } finally {
+                setLoading(false);
             }
         };
         fetchGyms();
@@ -36,8 +42,10 @@ const AdminDashboard = () => {
             });
             setGyms([res.data.gym, ...gyms]);
             setSuccess('Gym created successfully');
+            toast.success('Gym created successfully');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to create gym');
+            toast.error(err.response?.data?.message || 'Failed to create gym');
         }
     };
 
@@ -49,9 +57,11 @@ const AdminDashboard = () => {
             });
             setGyms(gyms.map((gym) => (gym._id === editGym._id ? res.data.gym : gym)));
             setSuccess('Gym updated successfully');
+            toast.success('Gym updated successfully');
             setEditGym(null);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update gym');
+            toast.error(err.response?.data?.message || 'Failed to update gym');
         }
     };
 
@@ -69,8 +79,10 @@ const AdminDashboard = () => {
                 setUsers({ members: [], trainers: [] });
             }
             setSuccess('Gym deleted successfully');
+            toast.success('Gym deleted successfully');
         } catch (err) {
             setError('Failed to delete gym');
+            toast.error('Failed to delete gym');
         }
     };
 
@@ -82,8 +94,10 @@ const AdminDashboard = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUsers(res.data);
+            toast.success(`Viewing users for ${gym.gymName}`);
         } catch (err) {
             setError('Failed to fetch users');
+            toast.error('Failed to fetch users');
         }
     };
 
@@ -114,7 +128,14 @@ const AdminDashboard = () => {
                             Create Gym
                         </button>
                     </div>
-                    {gyms.length > 0 ? (
+                    {loading ? (
+                        <div className="flex justify-center">
+                            <svg className="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    ) : gyms.length > 0 ? (
                         <div className="overflow-x-auto">
                             <table className="w-full text-left">
                                 <thead>

@@ -73,12 +73,12 @@ router.post('/register', upload.array('photos', 5), async (req, res) => {
 
         res.status(201).json({ token, user: { id: user._id, email: user.email, role: user.role } });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error); // Pass to error middleware
     }
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
     const { email, password, role } = req.body;
 
     if (!email || !password || !role) {
@@ -127,13 +127,12 @@ router.post('/login', async (req, res) => {
 
         res.json({ token, user: { id: user._id, email: user.email, role: user.role } });
     } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
 // Reset Password
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', async (req, res, next) => {
     const { email, role, newPassword } = req.body;
 
     if (!email || !role || !newPassword) {
@@ -170,12 +169,12 @@ router.post('/reset-password', async (req, res) => {
 
         res.json({ message: 'Password reset successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
 // Get Profile
-router.get('/profile', authMiddleware, async (req, res) => {
+router.get('/profile', authMiddleware, async (req, res, next) => {
     try {
         let user;
         switch (req.user.role) {
@@ -197,13 +196,13 @@ router.get('/profile', authMiddleware, async (req, res) => {
         }
         res.json(user);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 
-// Update Profile
-router.put('/profile', authMiddleware, async (req, res) => {
-    const { name, email, password, profileImage } = req.body;
+// Update Profile (Now with Image Upload)
+router.put('/profile', authMiddleware, upload.single('profileImage'), async (req, res, next) => {
+    const { name, email, password } = req.body;
 
     try {
         let user;
@@ -237,13 +236,34 @@ router.put('/profile', authMiddleware, async (req, res) => {
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(password, salt);
         }
-        if (profileImage) user.profileImage = profileImage;
+
+        // Handle profile image upload
+        if (req.file) {
+            // Delete the existing image if it exists
+            if (user.profileImage) {
+                const publicId = user.profileImage.split('/').pop().split('.')[0];
+                await cloudinary.uploader.destroy(`profile_images/${publicId}`);
+            }
+
+            // Upload the new image
+            const uploadResult = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                    { folder: 'profile_images' },
+                    (error, result) => {
+                        if (error) reject(error);
+                        resolve(result);
+                    }
+                ).end(req.file.buffer);
+            });
+
+            user.profileImage = uploadResult.secure_url;
+        }
 
         await user.save();
 
-        res.json({ message: 'Profile updated', user: { id: user._id, email: user.email, role: user.role } });
+        res.json({ message: 'Profile updated', user: { id: user._id, email: user.email, role: user.role, profileImage: user.profileImage } });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        next(error);
     }
 });
 

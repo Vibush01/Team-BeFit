@@ -38,6 +38,7 @@ const Navbar = () => {
                             )}
                             {user.role === 'member' && userDetails?.gym && (
                                 <>
+                                    <Link to="/member-dashboard" className="text-white mr-4">Dashboard</Link>
                                     <Link to="/macro-calculator" className="text-white mr-4">Macro Calculator</Link>
                                     <Link to="/progress-tracker" className="text-white mr-4">Progress Tracker</Link>
                                     <Link to="/booking" className="text-white mr-4">Book a Session</Link>
