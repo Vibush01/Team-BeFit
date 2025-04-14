@@ -13,7 +13,7 @@ const notificationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['join_request', 'plan_update', 'chat_message', 'membership_update'],
+    enum: ['join_request', 'apply_request', 'request_approved', 'request_denied', 'plan_update', 'chat_message', 'membership_update'], // Add request-related types
     required: true,
   },
   message: {
@@ -31,7 +31,7 @@ const notificationSchema = new mongoose.Schema({
   },
   relatedEntityModel: {
     type: String,
-    enum: ['Gym', 'WorkoutPlan', 'DietPlan', 'Membership'],
+    enum: ['Gym', 'WorkoutPlan', 'DietPlan', 'Membership', 'Request'], // Add Request model
   },
 }, { timestamps: true });
 

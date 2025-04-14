@@ -10,6 +10,10 @@ import GymManagement from './pages/GymManagement';
 import MembershipManagement from './pages/MembershipManagement';
 import TrainerPlanManagement from './pages/TrainerPlanManagement';
 import MemberPlans from './pages/MemberPlans';
+import JoinGym from './pages/JoinGym';
+import ApplyGym from './pages/ApplyGym';
+import ManageRequests from './pages/ManageRequests';
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -27,6 +31,10 @@ function App() {
             <Route path="/membership-management" element={<MembershipManagement />} />
             <Route path="/trainer-plan-management" element={<TrainerPlanManagement />} />
             <Route path="/member-plans" element={<MemberPlans />} />
+            <Route path="/join-gym" element={<JoinGym />} />
+            <Route path="/apply-gym" element={<ApplyGym />} />
+            <Route path="/manage-requests" element={<ManageRequests />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Routes>
         </div>
       </Router>

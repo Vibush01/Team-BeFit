@@ -21,6 +21,9 @@ const Dashboard = () => {
       <Link to="/profile" className="mb-4 bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">
         View/Edit Profile
       </Link>
+      <Link to="/notifications" className="mb-4 bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700">
+        View Notifications
+      </Link>
       {user.role === 'owner' && (
         <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Owner Dashboard</h2>
@@ -31,20 +34,23 @@ const Dashboard = () => {
         <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Gym Owner Dashboard</h2>
           <Link to="/gym-management" className="block mb-2 text-blue-600 hover:underline">Manage Gyms</Link>
-          <Link to="/membership-management" className="block text-blue-600 hover:underline">Manage Memberships</Link>
+          <Link to="/membership-management" className="block mb-2 text-blue-600 hover:underline">Manage Memberships</Link>
+          <Link to="/manage-requests" className="block text-blue-600 hover:underline">Manage Requests</Link>
         </div>
       )}
       {user.role === 'trainer' && (
         <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Trainer Dashboard</h2>
           <Link to="/membership-management" className="block mb-2 text-blue-600 hover:underline">Manage Members</Link>
-          <Link to="/trainer-plan-management" className="block text-blue-600 hover:underline">Manage Plans</Link>
+          <Link to="/trainer-plan-management" className="block mb-2 text-blue-600 hover:underline">Manage Plans</Link>
+          <Link to="/apply-gym" className="block text-blue-600 hover:underline">Apply to Gyms</Link>
         </div>
       )}
       {user.role === 'member' && (
         <div className="bg-white p-4 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Member Dashboard</h2>
-          <Link to="/member-plans" className="block text-blue-600 hover:underline">View Plans</Link>
+          <Link to="/member-plans" className="block mb-2 text-blue-600 hover:underline">View Plans</Link>
+          <Link to="/join-gym" className="block text-blue-600 hover:underline">Join a Gym</Link>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx'; // Update the extension
+import { useAuth } from '../context/AuthContext.jsx';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -13,6 +13,7 @@ const Navbar = () => {
           {user ? (
             <>
               <Link to="/dashboard" className="text-white hover:text-blue-200">Dashboard</Link>
+              <Link to="/notifications" className="text-white hover:text-blue-200">Notifications</Link>
               <button onClick={logout} className="text-white hover:text-blue-200">Logout</button>
             </>
           ) : (

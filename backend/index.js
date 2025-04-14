@@ -14,12 +14,14 @@ const DietPlan = require('./models/DietPlan');
 const Progress = require('./models/Progress');
 const Notification = require('./models/Notification');
 const Chat = require('./models/Chat');
+const Request = require('./models/Request');
 
 // Import routes
 const userRoutes = require('./routes/userRoutes');
 const gymRoutes = require('./routes/gymRoutes');
 const membershipRoutes = require('./routes/membershipRoutes');
 const planRoutes = require('./routes/planRoutes');
+const requestRoutes = require('./routes/requestRoutes'); // Add request routes
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -39,6 +41,7 @@ console.log('Models Defined:', {
   Progress: Progress.modelName,
   Notification: Notification.modelName,
   Chat: Chat.modelName,
+  Request: Request.modelName,
 });
 
 // Mount routes
@@ -46,6 +49,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/gyms', gymRoutes);
 app.use('/api/memberships', membershipRoutes);
 app.use('/api/plans', planRoutes);
+app.use('/api/requests', requestRoutes); // Mount request routes
 
 app.get('/', (req, res) => {
   res.send('BeFit Backend is Running');
