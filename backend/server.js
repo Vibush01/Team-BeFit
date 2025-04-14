@@ -14,7 +14,8 @@ const announcementRoutes = require('./routes/announcement');
 const adminRoutes = require('./routes/admin');
 const scheduleRoutes = require('./routes/schedule');
 const contactRoutes = require('./routes/contact');
-const analyticsRoutes = require('./routes/analytics'); // Add this import
+const analyticsRoutes = require('./routes/analytics');
+const reviewRoutes = require('./routes/review'); // Add this import
 
 dotenv.config();
 const app = express();
@@ -43,7 +44,8 @@ app.use('/api/announcement', announcementRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/contact', contactRoutes);
-app.use('/api/analytics', analyticsRoutes); // Add this route
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/review', reviewRoutes); // Add this route
 
 // Error Handler Middleware
 app.use(errorHandler);
@@ -62,7 +64,7 @@ io.on('connection', (socket) => {
         console.log(`User ${socket.id} joined gym ${gymId}`);
     });
 
-    socket.on('sendMessage', async ({ gymId, senderId, senderModel, message }) => {
+    socket.on('sendMessage', async ({ gymId, senderId, userModel, message }) => {
         try {
             const ChatMessage = require('./models/ChatMessage');
             const chatMessage = new ChatMessage({
