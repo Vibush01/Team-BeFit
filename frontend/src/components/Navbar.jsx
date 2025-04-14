@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const Navbar = () => {
-    const { user, logout } = useContext(AuthContext);
+    const { user, logout, userDetails } = useContext(AuthContext);
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -20,6 +20,15 @@ const Navbar = () => {
                         <>
                             {user.role === 'gym' && (
                                 <Link to="/gym-dashboard" className="text-white mr-4">Dashboard</Link>
+                            )}
+                            {user.role === 'member' && !userDetails?.gym && (
+                                <Link to="/" className="text-white mr-4">Find a Gym</Link>
+                            )}
+                            {user.role === 'member' && (
+                                <>
+                                    <Link to="/macro-calculator" className="text-white mr-4">Macro Calculator</Link>
+                                    <Link to="/progress-tracker" className="text-white mr-4">Progress Tracker</Link>
+                                </>
                             )}
                             <Link to="/profile" className="text-white mr-4">Profile</Link>
                             <button onClick={handleLogout} className="text-white">Logout</button>
