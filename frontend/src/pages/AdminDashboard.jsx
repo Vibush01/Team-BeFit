@@ -14,8 +14,10 @@ const AdminDashboard = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(true);
-    const [contactMessages, setContactMessages] = useState([]); // State for contact messages
-    const [messagesLoading, setMessagesLoading] = useState(true); // Loading state for messages
+    const [contactMessages, setContactMessages] = useState([]);
+    const [messagesLoading, setMessagesLoading] = useState(true);
+    const [analytics, setAnalytics] = useState([]);
+    const [analyticsLoading, setAnalyticsLoading] = useState(true);
 
     useEffect(() => {
         const fetchGyms = async () => {
@@ -50,8 +52,25 @@ const AdminDashboard = () => {
             }
         };
 
+        const fetchAnalytics = async () => {
+            try {
+                setAnalyticsLoading(true);
+                const token = localStorage.getItem('token');
+                const res = await axios.get('http://localhost:5000/api/analytics', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setAnalytics(res.data);
+            } catch (err) {
+                setError('Failed to fetch analytics');
+                toast.error('Failed to fetch analytics');
+            } finally {
+                setAnalyticsLoading(false);
+            }
+        };
+
         fetchGyms();
         fetchContactMessages();
+        fetchAnalytics();
     }, []);
 
     const handleCreateGym = async (formData) => {
@@ -144,16 +163,16 @@ const AdminDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 py-8">
+        <div className="min-h-screen bg-gray-100 py-6 sm:py-8 px-4">
             <div className="container mx-auto">
-                <h1 className="text-3xl font-bold mb-6 text-center">Admin Dashboard</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Admin Dashboard</h1>
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
                 {success && <p className="text-green-500 mb-4 text-center">{success}</p>}
 
                 {/* Gym List Section */}
-                <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold">Gyms</h2>
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg mb-6 sm:mb-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
+                        <h2 className="text-lg sm:text-xl font-bold mb-2 sm:mb-0">Gyms</h2>
                         <button
                             onClick={() => {
                                 setEditGym(null);
@@ -176,41 +195,41 @@ const AdminDashboard = () => {
                             <table className="w-full text-left">
                                 <thead>
                                     <tr>
-                                        <th className="p-2">Gym Name</th>
-                                        <th className="p-2">Address</th>
-                                        <th className="p-2">Owner Name</th>
-                                        <th className="p-2">Owner Email</th>
-                                        <th className="p-2">Email</th>
-                                        <th className="p-2">Actions</th>
+                                        <th className="p-2 text-sm sm:text-base">Gym Name</th>
+                                        <th className="p-2 text-sm sm:text-base">Address</th>
+                                        <th className="p-2 text-sm sm:text-base hidden md:table-cell">Owner Name</th>
+                                        <th className="p-2 text-sm sm:text-base hidden lg:table-cell">Owner Email</th>
+                                        <th className="p-2 text-sm sm:text-base hidden xl:table-cell">Email</th>
+                                        <th className="p-2 text-sm sm:text-base">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {gyms.map((gym) => (
                                         <tr key={gym._id} className="border-t">
-                                            <td className="p-2">{gym.gymName}</td>
-                                            <td className="p-2">{gym.address}</td>
-                                            <td className="p-2">{gym.ownerName}</td>
-                                            <td className="p-2">{gym.ownerEmail}</td>
-                                            <td className="p-2">{gym.email}</td>
-                                            <td className="p-2">
+                                            <td className="p-2 text-sm sm:text-base">{gym.gymName}</td>
+                                            <td className="p-2 text-sm sm:text-base">{gym.address}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden md:table-cell">{gym.ownerName}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{gym.ownerEmail}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden xl:table-cell">{gym.email}</td>
+                                            <td className="p-2 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                                                 <button
                                                     onClick={() => {
                                                         setEditGym(gym);
                                                         setModalOpen(true);
                                                     }}
-                                                    className="bg-yellow-600 text-white px-3 py-1 rounded mr-2 hover:bg-yellow-700"
+                                                    className="bg-yellow-600 text-white px-2 sm:px-3 py-1 rounded hover:bg-yellow-700 text-xs sm:text-sm"
                                                 >
                                                     Edit
                                                 </button>
                                                 <button
                                                     onClick={() => handleDeleteGym(gym._id)}
-                                                    className="bg-red-600 text-white px-3 py-1 rounded mr-2 hover:bg-red-700"
+                                                    className="bg-red-600 text-white px-2 sm:px-3 py-1 rounded hover:bg-red-700 text-xs sm:text-sm"
                                                 >
                                                     Delete
                                                 </button>
                                                 <button
                                                     onClick={() => handleViewUsers(gym)}
-                                                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                                                    className="bg-green-600 text-white px-2 sm:px-3 py-1 rounded hover:bg-green-700 text-xs sm:text-sm"
                                                 >
                                                     View Users
                                                 </button>
@@ -227,13 +246,13 @@ const AdminDashboard = () => {
 
                 {/* Gym Users Section */}
                 {selectedGym && (
-                    <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-                        <h2 className="text-xl font-bold mb-4">Users in {selectedGym.gymName}</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg mb-6 sm:mb-8">
+                        <h2 className="text-lg sm:text-xl font-bold mb-4">Users in {selectedGym.gymName}</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                             <div>
-                                <h3 className="text-lg font-bold mb-2">Members</h3>
+                                <h3 className="text-base sm:text-lg font-bold mb-2">Members</h3>
                                 {users.members.length > 0 ? (
-                                    <ul className="list-disc pl-5">
+                                    <ul className="list-disc pl-5 text-sm sm:text-base">
                                         {users.members.map((member) => (
                                             <li key={member._id} className="text-gray-700">
                                                 {member.name} ({member.email})
@@ -245,9 +264,9 @@ const AdminDashboard = () => {
                                 )}
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold mb-2">Trainers</h3>
+                                <h3 className="text-base sm:text-lg font-bold mb-2">Trainers</h3>
                                 {users.trainers.length > 0 ? (
-                                    <ul className="list-disc pl-5">
+                                    <ul className="list-disc pl-5 text-sm sm:text-base">
                                         {users.trainers.map((trainer) => (
                                             <li key={trainer._id} className="text-gray-700">
                                                 {trainer.name} ({trainer.email})
@@ -263,8 +282,8 @@ const AdminDashboard = () => {
                 )}
 
                 {/* Contact Messages Section */}
-                <div className="bg-white p-6 rounded-lg shadow-lg">
-                    <h2 className="text-xl font-bold mb-4">Contact Messages</h2>
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg mb-6 sm:mb-8">
+                    <h2 className="text-lg sm:text-xl font-bold mb-4">Contact Messages</h2>
                     {messagesLoading ? (
                         <div className="flex justify-center">
                             <svg className="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24">
@@ -277,28 +296,28 @@ const AdminDashboard = () => {
                             <table className="w-full text-left">
                                 <thead>
                                     <tr>
-                                        <th className="p-2">Name</th>
-                                        <th className="p-2">Email</th>
-                                        <th className="p-2">Phone</th>
-                                        <th className="p-2">Subject</th>
-                                        <th className="p-2">Message</th>
-                                        <th className="p-2">Received On</th>
-                                        <th className="p-2">Actions</th>
+                                        <th className="p-2 text-sm sm:text-base">Name</th>
+                                        <th className="p-2 text-sm sm:text-base hidden sm:table-cell">Email</th>
+                                        <th className="p-2 text-sm sm:text-base hidden md:table-cell">Phone</th>
+                                        <th className="p-2 text-sm sm:text-base hidden lg:table-cell">Subject</th>
+                                        <th className="p-2 text-sm sm:text-base hidden xl:table-cell">Message</th>
+                                        <th className="p-2 text-sm sm:text-base hidden md:table-cell">Received On</th>
+                                        <th className="p-2 text-sm sm:text-base">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {contactMessages.map((message) => (
                                         <tr key={message._id} className="border-t">
-                                            <td className="p-2">{message.name}</td>
-                                            <td className="p-2">{message.email}</td>
-                                            <td className="p-2">{message.phone}</td>
-                                            <td className="p-2">{message.subject}</td>
-                                            <td className="p-2">{message.message}</td>
-                                            <td className="p-2">{new Date(message.createdAt).toLocaleString()}</td>
+                                            <td className="p-2 text-sm sm:text-base">{message.name}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden sm:table-cell">{message.email}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden md:table-cell">{message.phone}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{message.subject}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden xl:table-cell">{message.message}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden md:table-cell">{new Date(message.createdAt).toLocaleString()}</td>
                                             <td className="p-2">
                                                 <button
                                                     onClick={() => handleDeleteMessage(message._id)}
-                                                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                                                    className="bg-red-600 text-white px-2 sm:px-3 py-1 rounded hover:bg-red-700 text-xs sm:text-sm"
                                                 >
                                                     Delete
                                                 </button>
@@ -310,6 +329,44 @@ const AdminDashboard = () => {
                         </div>
                     ) : (
                         <p className="text-gray-700 text-center">No contact messages found</p>
+                    )}
+                </div>
+
+                {/* Analytics Section */}
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg">
+                    <h2 className="text-lg sm:text-xl font-bold mb-4">Analytics - Page Views</h2>
+                    {analyticsLoading ? (
+                        <div className="flex justify-center">
+                            <svg className="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    ) : analytics.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr>
+                                        <th className="p-2 text-sm sm:text-base">Page</th>
+                                        <th className="p-2 text-sm sm:text-base hidden sm:table-cell">User</th>
+                                        <th className="p-2 text-sm sm:text-base hidden md:table-cell">Role</th>
+                                        <th className="p-2 text-sm sm:text-base hidden lg:table-cell">Visited On</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {analytics.map((entry) => (
+                                        <tr key={entry._id} className="border-t">
+                                            <td className="p-2 text-sm sm:text-base">{entry.page}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden sm:table-cell">{entry.userId || 'Anonymous'}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden md:table-cell">{entry.userModel || 'N/A'}</td>
+                                            <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{new Date(entry.timestamp).toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <p className="text-gray-700 text-center">No analytics data found</p>
                     )}
                 </div>
 

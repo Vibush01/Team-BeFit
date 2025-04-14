@@ -2,8 +2,11 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import useAnalytics from '../hooks/useAnalytics';
 
 const MemberDashboard = () => {
+    useAnalytics('MemberDashboard');
+
     const { user, userDetails } = useContext(AuthContext);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -37,9 +40,9 @@ const MemberDashboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 py-8">
+        <div className="min-h-screen bg-gray-100 py-6 sm:py-8 px-4">
             <div className="container mx-auto">
-                <h1 className="text-3xl font-bold mb-6 text-center">Member Dashboard</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-center">Member Dashboard</h1>
                 {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
                 {loading ? (
                     <div className="flex justify-center">
@@ -49,28 +52,28 @@ const MemberDashboard = () => {
                         </svg>
                     </div>
                 ) : (
-                    <div className="bg-white p-6 rounded-lg shadow-lg">
-                        <h2 className="text-xl font-bold mb-4">Your Booked Sessions</h2>
+                    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg">
+                        <h2 className="text-lg sm:text-xl font-bold mb-4">Your Booked Sessions</h2>
                         {bookings.length > 0 ? (
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>
                                         <tr>
-                                            <th className="p-2">Date</th>
-                                            <th className="p-2">Time Slot</th>
-                                            <th className="p-2">Trainer</th>
-                                            <th className="p-2">Gym</th>
-                                            <th className="p-2">Booked On</th>
+                                            <th className="p-2 text-sm sm:text-base">Date</th>
+                                            <th className="p-2 text-sm sm:text-base">Time Slot</th>
+                                            <th className="p-2 text-sm sm:text-base hidden sm:table-cell">Trainer</th>
+                                            <th className="p-2 text-sm sm:text-base hidden md:table-cell">Gym</th>
+                                            <th className="p-2 text-sm sm:text-base hidden lg:table-cell">Booked On</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {bookings.map((booking) => (
                                             <tr key={booking._id} className="border-t">
-                                                <td className="p-2">{new Date(booking.date).toLocaleDateString()}</td>
-                                                <td className="p-2">{booking.timeSlot}</td>
-                                                <td className="p-2">{booking.trainer.name} ({booking.trainer.email})</td>
-                                                <td className="p-2">{booking.gym.gymName}</td>
-                                                <td className="p-2">{new Date(booking.createdAt).toLocaleString()}</td>
+                                                <td className="p-2 text-sm sm:text-base">{new Date(booking.date).toLocaleDateString()}</td>
+                                                <td className="p-2 text-sm sm:text-base">{booking.timeSlot}</td>
+                                                <td className="p-2 text-sm sm:text-base hidden sm:table-cell">{booking.trainer.name} ({booking.trainer.email})</td>
+                                                <td className="p-2 text-sm sm:text-base hidden md:table-cell">{booking.gym.gymName}</td>
+                                                <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{new Date(booking.createdAt).toLocaleString()}</td>
                                             </tr>
                                         ))}
                                     </tbody>
