@@ -36,10 +36,17 @@ const Navbar = () => {
                                     <Link to="/announcements" className="text-white mr-4">Announcements</Link>
                                 </>
                             )}
-                            {user.role === 'member' && (
+                            {user.role === 'member' && userDetails?.gym && (
                                 <>
                                     <Link to="/macro-calculator" className="text-white mr-4">Macro Calculator</Link>
                                     <Link to="/progress-tracker" className="text-white mr-4">Progress Tracker</Link>
+                                    <Link to="/booking" className="text-white mr-4">Book a Session</Link>
+                                </>
+                            )}
+                            {user.role === 'trainer' && userDetails?.gym && (
+                                <>
+                                    <Link to="/trainer-schedule" className="text-white mr-4">Manage Schedules</Link>
+                                    <Link to="/trainer-bookings" className="text-white mr-4">View Bookings</Link>
                                 </>
                             )}
                             <Link to="/profile" className="text-white mr-4">Profile</Link>

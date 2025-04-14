@@ -17,6 +17,9 @@ import ProgressTracker from './pages/ProgressTracker';
 import Chat from './pages/Chat';
 import Announcements from './pages/Announcements';
 import AdminDashboard from './pages/AdminDashboard';
+import TrainerSchedule from './pages/TrainerSchedule';
+import Booking from './pages/Booking';
+import TrainerBookings from './pages/TrainerBookings';
 
 function App() {
     return (
@@ -60,6 +63,21 @@ function App() {
                     <Route path="/admin-dashboard" element={
                         <ProtectedRoute>
                             <AdminDashboard />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/trainer-schedule" element={
+                        <ProtectedRoute>
+                            <TrainerSchedule />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/booking" element={
+                        <ProtectedRoute>
+                            <Booking />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/trainer-bookings" element={
+                        <ProtectedRoute>
+                            <TrainerBookings />
                         </ProtectedRoute>
                     } />
                     <Route

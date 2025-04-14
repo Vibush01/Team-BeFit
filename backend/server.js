@@ -11,6 +11,7 @@ const memberRoutes = require('./routes/member');
 const chatRoutes = require('./routes/chat');
 const announcementRoutes = require('./routes/announcement');
 const adminRoutes = require('./routes/admin');
+const scheduleRoutes = require('./routes/schedule');
 
 dotenv.config();
 const app = express();
@@ -37,6 +38,7 @@ app.use('/api/member', memberRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/announcement', announcementRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/schedule', scheduleRoutes);
 
 // Test Route
 app.get('/api/test', (req, res) => {
