@@ -4,6 +4,8 @@ const Review = require('../models/Review');
 const Gym = require('../models/Gym');
 const Member = require('../models/Member');
 const authMiddleware = require('../middleware/auth');
+const Analytics = require('../models/Analytics');
+
 
 // Create a review (Member only)
 router.post('/', authMiddleware, async (req, res, next) => {
@@ -40,6 +42,16 @@ router.post('/', authMiddleware, async (req, res, next) => {
         });
 
         await review.save();
+
+        // Log review submission action
+        const analyticsEntry = new Analytics({
+            action: 'ReviewSubmission',
+            userId: req.user.id,
+            userModel: 'Member',
+            details: { gymId, rating },
+        });
+        await analyticsEntry.save();
+
         res.status(201).json(review);
     } catch (error) {
         next(error);

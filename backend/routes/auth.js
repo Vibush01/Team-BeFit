@@ -9,6 +9,7 @@ const Gym = require('../models/Gym');
 const Trainer = require('../models/Trainer');
 const Member = require('../models/Member');
 const authMiddleware = require('../middleware/auth');
+const Analytics = require('../models/Analytics');
 
 // Configure Multer for file uploads
 const storage = multer.memoryStorage();
@@ -124,6 +125,14 @@ router.post('/login', async (req, res, next) => {
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );
+
+        // Log login action
+        const analyticsEntry = new Analytics({
+            action: 'Login',
+            userId: user._id,
+            userModel: role.charAt(0).toUpperCase() + role.slice(1),
+        });
+        await analyticsEntry.save();
 
         res.json({ token, user: { id: user._id, email: user.email, role: user.role } });
     } catch (error) {

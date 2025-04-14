@@ -12,8 +12,8 @@ const GymProfile = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [joinRequests, setJoinRequests] = useState([]);
-    const [reviews, setReviews] = useState([]); // State for reviews
-    const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' }); // State for review form
+    const [reviews, setReviews] = useState([]);
+    const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
 
     useEffect(() => {
         const fetchGym = async () => {

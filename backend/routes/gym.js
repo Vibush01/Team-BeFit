@@ -8,6 +8,7 @@ const Gym = require('../models/Gym');
 const Member = require('../models/Member');
 const Trainer = require('../models/Trainer');
 const JoinRequest = require('../models/JoinRequest');
+const Analytics = require('../models/Analytics');
 
 // Configure Multer for file uploads
 const storage = multer.memoryStorage();
@@ -139,6 +140,63 @@ router.put('/update', authMiddleware, upload.array('photos', 5), async (req, res
         res.json({ message: 'Gym updated', gym });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Create a join request (Member or Trainer)
+router.post('/request/:gymId', authMiddleware, async (req, res, next) => {
+    if (req.user.role !== 'member' && req.user.role !== 'trainer') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const { role } = req.body;
+
+    if (role !== req.user.role) {
+        return res.status(400).json({ message: 'Role mismatch' });
+    }
+
+    try {
+        const gym = await Gym.findById(req.params.gymId);
+        if (!gym) {
+            return res.status(404).json({ message: 'Gym not found' });
+        }
+
+        const userModel = role === 'member' ? Member : Trainer;
+        const user = await userModel.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (user.gym) {
+            return res.status(400).json({ message: 'User is already part of a gym' });
+        }
+
+        const existingRequest = await JoinRequest.findOne({ user: req.user.id, gym: req.params.gymId });
+        if (existingRequest) {
+            return res.status(400).json({ message: 'Join request already exists' });
+        }
+
+        const joinRequest = new JoinRequest({
+            user: req.user.id,
+            gym: req.params.gymId,
+            role,
+            status: 'pending',
+        });
+
+        await joinRequest.save();
+
+        // Log join request action
+        const analyticsEntry = new Analytics({
+            action: 'JoinRequest',
+            userId: req.user.id,
+            userModel: role.charAt(0).toUpperCase() + role.slice(1),
+            details: { gymId: req.params.gymId },
+        });
+        await analyticsEntry.save();
+
+        res.status(201).json({ message: 'Join request sent' });
+    } catch (error) {
+        next(error);
     }
 });
 

@@ -3,6 +3,11 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import GymFormModal from '../components/GymFormModal';
 import { toast } from 'react-toastify';
+import { Bar, Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const AdminDashboard = () => {
     const { user } = useContext(AuthContext);
@@ -18,8 +23,9 @@ const AdminDashboard = () => {
     const [messagesLoading, setMessagesLoading] = useState(true);
     const [analytics, setAnalytics] = useState([]);
     const [analyticsLoading, setAnalyticsLoading] = useState(true);
-    const [reviews, setReviews] = useState([]); // State for reviews
-    const [reviewsLoading, setReviewsLoading] = useState(true); // Loading state for reviews
+    const [reviews, setReviews] = useState([]);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
+    const [analyticsSummary, setAnalyticsSummary] = useState({ pageViews: [], actions: [] });
 
     useEffect(() => {
         const fetchGyms = async () => {
@@ -70,6 +76,19 @@ const AdminDashboard = () => {
             }
         };
 
+        const fetchAnalyticsSummary = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get('http://localhost:5000/api/analytics/summary', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setAnalyticsSummary(res.data);
+            } catch (err) {
+                setError('Failed to fetch analytics summary');
+                toast.error('Failed to fetch analytics summary');
+            }
+        };
+
         const fetchReviews = async () => {
             try {
                 setReviewsLoading(true);
@@ -89,6 +108,7 @@ const AdminDashboard = () => {
         fetchGyms();
         fetchContactMessages();
         fetchAnalytics();
+        fetchAnalyticsSummary();
         fetchReviews();
     }, []);
 
@@ -189,6 +209,36 @@ const AdminDashboard = () => {
             setError('Failed to delete review');
             toast.error('Failed to delete review');
         }
+    };
+
+    // Chart data for page views
+    const pageViewsData = {
+        labels: analyticsSummary.pageViews.map((item) => item._id),
+        datasets: [
+            {
+                label: 'Page Views',
+                data: analyticsSummary.pageViews.map((item) => item.count),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    // Chart data for actions
+    const actionsData = {
+        labels: analyticsSummary.actions.map((item) => item._id),
+        datasets: [
+            {
+                data: analyticsSummary.actions.map((item) => item.count),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                ],
+            },
+        ],
     };
 
     if (user?.role !== 'admin') {
@@ -415,44 +465,90 @@ const AdminDashboard = () => {
                         <p className="text-gray-700 text-center">No reviews found</p>
                     )}
                 </div>
+                
 
-                {/* Analytics Section */}
-                <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg">
-                    <h2 className="text-lg sm:text-xl font-bold mb-4">Analytics - Page Views</h2>
-                    {analyticsLoading ? (
-                        <div className="flex justify-center">
-                            <svg className="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </div>
-                    ) : analytics.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead>
-                                    <tr>
-                                        <th className="p-2 text-sm sm:text-base">Page</th>
-                                        <th className="p-2 text-sm sm:text-base hidden sm:table-cell">User</th>
-                                        <th className="p-2 text-sm sm:text-base hidden md:table-cell">Role</th>
-                                        <th className="p-2 text-sm sm:text-base hidden lg:table-cell">Visited On</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {analytics.map((entry) => (
-                                        <tr key={entry._id} className="border-t">
-                                            <td className="p-2 text-sm sm:text-base">{entry.page}</td>
-                                            <td className="p-2 text-sm sm:text-base hidden sm:table-cell">{entry.userId || 'Anonymous'}</td>
-                                            <td className="p-2 text-sm sm:text-base hidden md:table-cell">{entry.userModel || 'N/A'}</td>
-                                            <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{new Date(entry.timestamp).toLocaleString()}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    ) : (
-                        <p className="text-gray-700 text-center">No analytics data found</p>
-                    )}
-                </div>
+                 {/* Analytics Section */}
+<div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg mb-6 sm:mb-8">
+    <h2 className="text-lg sm:text-xl font-bold mb-4">Analytics Overview</h2>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+            <h3 className="text-base sm:text-lg font-semibold mb-2">Page Views</h3>
+            {analyticsSummary.pageViews.length > 0 ? (
+                <Bar
+                    data={pageViewsData}
+                    options={{
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Page Views by Page' },
+                        },
+                    }}
+                />
+            ) : (
+                <p className="text-gray-700 text-center">No page views data available</p>
+            )}
+        </div>
+        <div>
+            <h3 className="text-base sm:text-lg font-semibold mb-2">User Actions</h3>
+            {analyticsSummary.actions.length > 0 ? (
+                <Pie
+                    data={actionsData}
+                    options={{
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'User Actions Distribution' },
+                        },
+                    }}
+                />
+            ) : (
+                <p className="text-gray-700 text-center">No actions data available</p>
+            )}
+        </div>
+    </div>
+</div>
+
+{/* Analytics Table Section */}
+<div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg">
+    <h2 className="text-lg sm:text-xl font-bold mb-4">Analytics - All Events</h2>
+    {analyticsLoading ? (
+        <div className="flex justify-center">
+            <svg className="animate-spin h-8 w-8 text-blue-600" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+    ) : analytics.length > 0 ? (
+        <div className="overflow-x-auto">
+            <table className="w-full text-left">
+                <thead>
+                    <tr>
+                        <th className="p-2 text-sm sm:text-base">Action</th>
+                        <th className="p-2 text-sm sm:text-base hidden sm:table-cell">Page</th>
+                        <th className="p-2 text-sm sm:text-base hidden md:table-cell">User</th>
+                        <th className="p-2 text-sm sm:text-base hidden md:table-cell">Role</th>
+                        <th className="p-2 text-sm sm:text-base hidden lg:table-cell">Details</th>
+                        <th className="p-2 text-sm sm:text-base hidden lg:table-cell">Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {analytics.map((entry) => (
+                        <tr key={entry._id} className="border-t">
+                            <td className="p-2 text-sm sm:text-base">{entry.action}</td>
+                            <td className="p-2 text-sm sm:text-base hidden sm:table-cell">{entry.page || 'N/A'}</td>
+                            <td className="p-2 text-sm sm:text-base hidden md:table-cell">{entry.userId || 'Anonymous'}</td>
+                            <td className="p-2 text-sm sm:text-base hidden md:table-cell">{entry.userModel || 'N/A'}</td>
+                            <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{entry.details ? JSON.stringify(entry.details) : 'N/A'}</td>
+                            <td className="p-2 text-sm sm:text-base hidden lg:table-cell">{new Date(entry.timestamp).toLocaleString()}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    ) : (
+        <p className="text-gray-700 text-center">No analytics data found</p>
+    )}
+</div>
 
                 {/* Modal for Create/Update Gym */}
                 <GymFormModal
