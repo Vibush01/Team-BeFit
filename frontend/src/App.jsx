@@ -14,6 +14,8 @@ import GymProfile from './pages/GymProfile';
 import GymDashboard from './pages/GymDashboard';
 import MacroCalculator from './pages/MacroCalculator';
 import ProgressTracker from './pages/ProgressTracker';
+import Chat from './pages/Chat';
+import Announcements from './pages/Announcements';
 
 function App() {
     return (
@@ -42,6 +44,16 @@ function App() {
                     <Route path="/progress-tracker" element={
                         <ProtectedRoute>
                             <ProgressTracker />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/chat" element={
+                        <ProtectedRoute>
+                            <Chat />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/announcements" element={
+                        <ProtectedRoute>
+                            <Announcements />
                         </ProtectedRoute>
                     } />
                     <Route

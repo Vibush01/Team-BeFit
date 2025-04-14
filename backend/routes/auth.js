@@ -89,7 +89,6 @@ router.post('/login', async (req, res) => {
         let user;
         let Model;
 
-        // Trim inputs
         const trimmedEmail = email.trim();
         const trimmedPassword = password.trim();
 
@@ -110,7 +109,6 @@ router.post('/login', async (req, res) => {
                 return res.status(400).json({ message: 'Invalid role' });
         }
 
-        // Case-insensitive email lookup
         user = await Model.findOne({ email: { $regex: new RegExp('^' + trimmedEmail + '$', 'i') } });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
@@ -130,6 +128,48 @@ router.post('/login', async (req, res) => {
         res.json({ token, user: { id: user._id, email: user.email, role: user.role } });
     } catch (error) {
         console.error('Login error:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+// Reset Password
+router.post('/reset-password', async (req, res) => {
+    const { email, role, newPassword } = req.body;
+
+    if (!email || !role || !newPassword) {
+        return res.status(400).json({ message: 'Email, role, and new password are required' });
+    }
+
+    try {
+        let Model;
+
+        switch (role) {
+            case 'admin':
+                Model = Admin;
+                break;
+            case 'gym':
+                Model = Gym;
+                break;
+            case 'trainer':
+                Model = Trainer;
+                break;
+            case 'member':
+                Model = Member;
+                break;
+            default:
+                return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        const user = await Model.findOne({ email: { $regex: new RegExp('^' + email.trim() + '$', 'i') } });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.password = newPassword; // The pre('save') hook will hash it
+        await user.save();
+
+        res.json({ message: 'Password reset successfully' });
+    } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });

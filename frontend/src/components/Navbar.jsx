@@ -19,10 +19,19 @@ const Navbar = () => {
                     {user ? (
                         <>
                             {user.role === 'gym' && (
-                                <Link to="/gym-dashboard" className="text-white mr-4">Dashboard</Link>
+                                <>
+                                    <Link to="/gym-dashboard" className="text-white mr-4">Dashboard</Link>
+                                    <Link to="/announcements" className="text-white mr-4">Announcements</Link>
+                                </>
                             )}
                             {user.role === 'member' && !userDetails?.gym && (
                                 <Link to="/" className="text-white mr-4">Find a Gym</Link>
+                            )}
+                            {(user.role === 'member' || user.role === 'trainer') && userDetails?.gym && (
+                                <>
+                                    <Link to="/chat" className="text-white mr-4">Chat</Link>
+                                    <Link to="/announcements" className="text-white mr-4">Announcements</Link>
+                                </>
                             )}
                             {user.role === 'member' && (
                                 <>

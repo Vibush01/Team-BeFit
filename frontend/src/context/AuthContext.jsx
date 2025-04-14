@@ -7,18 +7,25 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [userDetails, setUserDetails] = useState(null);
+    const [loading, setLoading] = useState(true); // Add loading state
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setUser({ id: decoded.id, role: decoded.role });
-                fetchUserDetails(decoded.id, decoded.role, token);
-            } catch (error) {
-                localStorage.removeItem('token');
+        const restoreSession = async () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    const decoded = jwtDecode(token);
+                    setUser({ id: decoded.id, role: decoded.role });
+                    await fetchUserDetails(decoded.id, decoded.role, token);
+                } catch (error) {
+                    localStorage.removeItem('token');
+                    setUser(null);
+                    setUserDetails(null);
+                }
             }
-        }
+            setLoading(false); // Set loading to false after session restoration
+        };
+        restoreSession();
     }, []);
 
     const fetchUserDetails = async (id, role, token) => {
@@ -57,7 +64,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, userDetails, login, logout }}>
+        <AuthContext.Provider value={{ user, userDetails, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
