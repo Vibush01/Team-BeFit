@@ -8,6 +8,8 @@ const trainerSchema = new mongoose.Schema({
     experienceYears: { type: Number, required: true },
     experienceMonths: { type: Number, required: true },
     role: { type: String, default: 'trainer' },
+    profileImage: { type: String },
+    gym: { type: mongoose.Schema.Types.ObjectId, ref: 'Gym', default: null }, // Gym they belong to
 });
 
 trainerSchema.pre('save', async function (next) {

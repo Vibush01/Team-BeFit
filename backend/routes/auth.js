@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
@@ -8,8 +10,12 @@ const Trainer = require('../models/Trainer');
 const Member = require('../models/Member');
 const authMiddleware = require('../middleware/auth');
 
+// Configure Multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', upload.array('photos', 5), async (req, res) => {
     const { role, ...data } = req.body;
 
     try {
@@ -24,6 +30,21 @@ router.post('/register', async (req, res) => {
             case 'gym':
                 Model = Gym;
                 user = new Gym({ ...data, role: 'gym' });
+                if (req.files && req.files.length > 0) {
+                    const uploadPromises = req.files.map((file) =>
+                        new Promise((resolve, reject) => {
+                            cloudinary.uploader.upload_stream(
+                                { folder: 'gym_photos' },
+                                (error, result) => {
+                                    if (error) reject(error);
+                                    resolve(result.secure_url);
+                                }
+                            ).end(file.buffer);
+                        })
+                    );
+                    const uploadedPhotos = await Promise.all(uploadPromises);
+                    user.photos = uploadedPhotos;
+                }
                 break;
             case 'trainer':
                 Model = Trainer;
@@ -105,7 +126,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Protected Route (Test)
+// Get Profile
 router.get('/profile', authMiddleware, async (req, res) => {
     try {
         let user;
@@ -123,9 +144,58 @@ router.get('/profile', authMiddleware, async (req, res) => {
                 user = await Member.findById(req.user.id).select('-password');
                 break;
         }
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
         res.json(user);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// Update Profile (Temporary)
+router.put('/profile', authMiddleware, async (req, res) => {
+    const { name, email, password, profileImage } = req.body;
+
+    try {
+        let user;
+        let Model;
+
+        switch (req.user.role) {
+            case 'admin':
+                Model = Admin;
+                break;
+            case 'gym':
+                Model = Gym;
+                break;
+            case 'trainer':
+                Model = Trainer;
+                break;
+            case 'member':
+                Model = Member;
+                break;
+            default:
+                return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        user = await Model.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+        if (profileImage) user.profileImage = profileImage;
+
+        await user.save();
+
+        res.json({ message: 'Profile updated', user: { id: user._id, email: user.email, role: user.role } });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 

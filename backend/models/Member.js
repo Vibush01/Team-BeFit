@@ -7,6 +7,13 @@ const memberSchema = new mongoose.Schema({
     password: { type: String, required: true },
     contact: { type: String, required: true },
     role: { type: String, default: 'member' },
+    profileImage: { type: String },
+    gym: { type: mongoose.Schema.Types.ObjectId, ref: 'Gym', default: null }, // Gym they belong to
+    membership: {
+        duration: { type: String, enum: ['1 week', '1 month', '3 months', '6 months', '1 year'] },
+        startDate: { type: Date },
+        endDate: { type: Date },
+    },
 });
 
 memberSchema.pre('save', async function (next) {

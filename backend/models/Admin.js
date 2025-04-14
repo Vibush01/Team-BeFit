@@ -6,9 +6,9 @@ const adminSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     role: { type: String, default: 'admin' },
+    profileImage: { type: String },
 });
 
-// Hash password before saving
 adminSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
     const salt = await bcrypt.genSalt(10);
@@ -16,7 +16,6 @@ adminSchema.pre('save', async function (next) {
     next();
 });
 
-// Compare password for login
 adminSchema.methods.matchPassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password);
 };

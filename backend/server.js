@@ -4,6 +4,7 @@ const cors = require('cors');
 const connectDB = require('./config/db');
 const configureCloudinary = require('./config/cloudinary');
 const authRoutes = require('./routes/auth');
+const gymRoutes = require('./routes/gym');
 
 dotenv.config();
 const app = express();
@@ -18,6 +19,7 @@ configureCloudinary();
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/gym', gymRoutes);
 
 // Test Route
 app.get('/api/test', (req, res) => {
