@@ -1,12 +1,12 @@
 import { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 
 const Login = () => {
     const [formData, setFormData] = useState({ email: '', password: '', role: 'member' });
     const [error, setError] = useState('');
     const { login } = useContext(AuthContext);
-    const navigate = useNavigate(); // Added for navigation
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -14,11 +14,12 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('Form data being sent:', formData); // Debug log
         try {
             await login(formData.email, formData.password, formData.role);
-            navigate('/profile'); // Navigate after successful login
+            navigate('/profile');
         } catch (err) {
-            setError(err);
+            setError(err.message || 'Failed to login');
         }
     };
 

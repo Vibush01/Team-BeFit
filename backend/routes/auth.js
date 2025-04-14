@@ -58,7 +58,6 @@ router.post('/register', upload.array('photos', 5), async (req, res) => {
                 return res.status(400).json({ message: 'Invalid role' });
         }
 
-        // Check if user already exists
         const existingUser = await Model.findOne({ email: data.email });
         if (existingUser) {
             return res.status(400).json({ message: 'Email already exists' });
@@ -66,7 +65,6 @@ router.post('/register', upload.array('photos', 5), async (req, res) => {
 
         await user.save();
 
-        // Generate JWT
         const token = jwt.sign(
             { id: user._id, role: user.role },
             process.env.JWT_SECRET,
@@ -83,9 +81,17 @@ router.post('/register', upload.array('photos', 5), async (req, res) => {
 router.post('/login', async (req, res) => {
     const { email, password, role } = req.body;
 
+    if (!email || !password || !role) {
+        return res.status(400).json({ message: 'Email, password, and role are required' });
+    }
+
     try {
         let user;
         let Model;
+
+        // Trim inputs
+        const trimmedEmail = email.trim();
+        const trimmedPassword = password.trim();
 
         switch (role) {
             case 'admin':
@@ -104,12 +110,13 @@ router.post('/login', async (req, res) => {
                 return res.status(400).json({ message: 'Invalid role' });
         }
 
-        user = await Model.findOne({ email });
+        // Case-insensitive email lookup
+        user = await Model.findOne({ email: { $regex: new RegExp('^' + trimmedEmail + '$', 'i') } });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        const isMatch = await user.matchPassword(password);
+        const isMatch = await user.matchPassword(trimmedPassword);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
@@ -122,6 +129,7 @@ router.post('/login', async (req, res) => {
 
         res.json({ token, user: { id: user._id, email: user.email, role: user.role } });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
@@ -149,11 +157,11 @@ router.get('/profile', authMiddleware, async (req, res) => {
         }
         res.json(user);
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
-// Update Profile (Temporary)
+// Update Profile
 router.put('/profile', authMiddleware, async (req, res) => {
     const { name, email, password, profileImage } = req.body;
 
