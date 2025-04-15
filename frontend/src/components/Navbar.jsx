@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 const Navbar = () => {
     const { user, logout, userDetails } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [isOpen, setIsOpen] = useState(false); // State for mobile menu toggle
+    const [isOpen, setIsOpen] = useState(false);
 
     const handleLogout = () => {
         logout();
@@ -55,12 +55,14 @@ const Navbar = () => {
                                         <Link to="/macro-calculator" className="text-white py-2 md:py-0 hover:underline">Macro Calculator</Link>
                                         <Link to="/progress-tracker" className="text-white py-2 md:py-0 hover:underline">Progress Tracker</Link>
                                         <Link to="/booking" className="text-white py-2 md:py-0 hover:underline">Book a Session</Link>
+                                        <Link to="/member-plan-request" className="text-white py-2 md:py-0 hover:underline">Request Plan</Link>
                                     </>
                                 )}
                                 {user.role === 'trainer' && userDetails?.gym && (
                                     <>
                                         <Link to="/trainer-schedule" className="text-white py-2 md:py-0 hover:underline">Manage Schedules</Link>
                                         <Link to="/trainer-bookings" className="text-white py-2 md:py-0 hover:underline">View Bookings</Link>
+                                        <Link to="/trainer-plan-management" className="text-white py-2 md:py-0 hover:underline">Manage Plans</Link>
                                     </>
                                 )}
                                 <Link to="/profile" className="text-white py-2 md:py-0 hover:underline">Profile</Link>

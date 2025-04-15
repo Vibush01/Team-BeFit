@@ -23,7 +23,9 @@ import TrainerSchedule from './pages/TrainerSchedule';
 import Booking from './pages/Booking';
 import TrainerBookings from './pages/TrainerBookings';
 import MemberDashboard from './pages/MemberDashboard';
-import HomePage from './pages/HomePage'; // Add this import
+import HomePage from './pages/HomePage';
+import MemberPlanRequest from './pages/MemberPlanRequest'; // Add this import
+import TrainerPlanManagement from './pages/TrainerPlanManagement'; // Add this import
 
 function App() {
     return (
@@ -31,8 +33,8 @@ function App() {
             <Router>
                 <Navbar />
                 <Routes>
-                    <Route path="/" element={<HomePage />} /> {/* Set HomePage as default route */}
-                    <Route path="/gyms" element={<GymList />} /> {/* Move GymList to /gyms */}
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/gyms" element={<GymList />} />
                     <Route path="/signup" element={<RoleSelection />} />
                     <Route path="/signup/admin" element={<AdminSignup />} />
                     <Route path="/signup/gym" element={<GymSignup />} />
@@ -88,6 +90,16 @@ function App() {
                     <Route path="/member-dashboard" element={
                         <ProtectedRoute>
                             <MemberDashboard />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/member-plan-request" element={
+                        <ProtectedRoute>
+                            <MemberPlanRequest />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/trainer-plan-management" element={
+                        <ProtectedRoute>
+                            <TrainerPlanManagement />
                         </ProtectedRoute>
                     } />
                     <Route

@@ -15,7 +15,8 @@ const adminRoutes = require('./routes/admin');
 const scheduleRoutes = require('./routes/schedule');
 const contactRoutes = require('./routes/contact');
 const analyticsRoutes = require('./routes/analytics');
-const reviewRoutes = require('./routes/review'); // Add this import
+const reviewRoutes = require('./routes/review');
+const planRoutes = require('./routes/plan'); // Add this import
 
 dotenv.config();
 const app = express();
@@ -45,7 +46,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/schedule', scheduleRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/analytics', analyticsRoutes);
-app.use('/api/review', reviewRoutes); // Add this route
+app.use('/api/review', reviewRoutes);
+app.use('/api/plan', planRoutes); // Add this route
 
 // Error Handler Middleware
 app.use(errorHandler);
