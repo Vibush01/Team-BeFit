@@ -25,7 +25,7 @@ const MemberPlanRequest = () => {
                 });
                 setTrainers(res.data);
             } catch (err) {
-                setError('Failed to fetch trainers');
+                setError('Failed to fetch trainers'+err);
                 toast.error('Failed to fetch trainers');
             }
         };
@@ -38,7 +38,7 @@ const MemberPlanRequest = () => {
                 });
                 setRequests(res.data);
             } catch (err) {
-                setError('Failed to fetch plan requests');
+                setError('Failed to fetch plan requests'+err);
                 toast.error('Failed to fetch plan requests');
             }
         };
@@ -51,7 +51,7 @@ const MemberPlanRequest = () => {
                 });
                 setPlans(res.data);
             } catch (err) {
-                setError('Failed to fetch plans');
+                setError('Failed to fetch plans'+err);
                 toast.error('Failed to fetch plans');
             } finally {
                 setLoading(false);

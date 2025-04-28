@@ -23,7 +23,7 @@ const TrainerPlanManagement = () => {
                 });
                 setRequests(res.data);
             } catch (err) {
-                setError('Failed to fetch plan requests');
+                setError('Failed to fetch plan requests'+err);
                 toast.error('Failed to fetch plan requests');
             } finally {
                 setLoading(false);
