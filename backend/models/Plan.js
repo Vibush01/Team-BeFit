@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const planSchema = new mongoose.Schema({
     planRequest: { type: mongoose.Schema.Types.ObjectId, ref: 'PlanRequest', required: true },
     member: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
@@ -9,5 +8,4 @@ const planSchema = new mongoose.Schema({
     dietPlan: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
 });
-
 module.exports = mongoose.model('Plan', planSchema);
